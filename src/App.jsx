@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 //COMPONENTES
 import Formulario from "./components/Formulario";
 import Resultado from "./components/Resultado";
+import Spiner from "./components/Spiner";
 
 //ESTILOS DE EL COMPONENTE
 const Contenedor = styled.div`
@@ -23,6 +24,17 @@ const Imagen = styled.img`
   width: 80%;
   margin: 100px auto 0 auto;
   display: block;
+  text-align: center;
+  display: block;
+`;
+
+const Parrafo = styled.p`
+  color: #fff;
+  font-family: "Lato", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0;
 `;
 
 const Heading = styled.h1`
@@ -47,18 +59,24 @@ const Heading = styled.h1`
 function App() {
   const [monedas, setMonedas] = useState({});
   const [cotizacion, setCotizacion] = useState({});
+  const [cargando, setCargando] = useState(false);
+  const [resultado, setResultado] = useState(false);
 
   //UseEffect
   useEffect(() => {
     if (Object.keys(monedas).length === 0) return;
 
     const consultarAPI = async () => {
+      setCargando(true);
+      setCotizacion({});
       const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${monedas.criptoMonedas}&tsyms=${monedas.moneda},${monedas.moneda}`;
 
       const respuesta = await fetch(url);
       const resultado = await respuesta.json();
 
       setCotizacion(resultado.DISPLAY[monedas.criptoMonedas][monedas.moneda]);
+      setCargando(false);
+      setResultado(true);
     };
     consultarAPI();
   }, [monedas]);
@@ -70,7 +88,9 @@ function App() {
         <Heading>Cotiza Criptomonedas al Instante</Heading>
         <Formulario setMonedas={setMonedas} />
 
-        {cotizacion.PRICE && <Resultado cotizacion={cotizacion} />}
+        {cargando && <Parrafo className="">Cargando...</Parrafo>}
+        {/* si cargando es falso y resultado true mostrar Resultado */}
+        {!cargando && resultado && <Resultado cotizacion={cotizacion} />}
       </div>
     </Contenedor>
   );
